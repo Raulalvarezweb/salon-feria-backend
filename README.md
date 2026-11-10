@@ -1,3 +1,30 @@
+# Palacio de Ferias — Backend
+
+API REST (Node.js + Express) de la feria virtual de empleo **Palacio de Ferias**, proyecto académico desarrollado en equipo durante las prácticas de DAW. No es una web oficial.
+Frontend: [salon-feria-frontend](https://github.com/Raulalvarezweb/salon-feria-frontend) · Repositorio original: [PedroFMedac/salon-feria](https://github.com/PedroFMedac/salon-feria)
+
+- **Base de datos:** Firebase Firestore
+- **Archivos subidos** (logos, banners, CV, documentos): Supabase Storage
+- **Autenticación:** JWT en cookie `httpOnly`
+
+## Puesta en marcha
+
+```bash
+npm install
+cp .env.example .env   # y rellena las variables
+npm run seed           # crea stands, recepcionistas y el usuario admin
+npm start              # http://localhost:3000
+```
+
+### Despliegue en Render
+- *New → Web Service* con este repo · Build: `npm install` · Start: `npm start`
+- Añade como variables de entorno las de `.env.example` (en `FIREBASE_SERVICE_ACCOUNT` va el contenido del JSON de la cuenta de servicio).
+- Comprobación: `GET /health` → `{ "ok": true }`
+
+---
+
+# Documentación original
+
 
 # Backend Project
 

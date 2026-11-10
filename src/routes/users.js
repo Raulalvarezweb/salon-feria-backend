@@ -11,7 +11,7 @@ const usersController = require('../controllers/userController');
 const { verifyToken, verifyHeaderToken } = require('../middlewares/authMiddleware');
 const multer = require('multer');
 
-const upload = multer({ dest: 'udloads/' });
+const upload = multer({ dest: 'uploads/' });
 
 /**
  * Registra un nuevo usuario en el sistema.

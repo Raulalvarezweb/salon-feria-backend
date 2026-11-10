@@ -7,7 +7,7 @@
 
 const { db, admin } = require('../config/firebaseConfig');
 const jwt = require('jsonwebtoken');
-const { uploadFileToDrive, getFileIdFromUrl, deleteFileFromDrive } = require('../config/googleDrive');
+const { uploadFile, getFileIdFromUrl, deleteFile } = require('../config/storage');
 const fs = require('fs');
 
 /**
@@ -79,9 +79,9 @@ const addInfCompany = async (req, res) => {
         let uploadedDocuments = [];
 
         for (const document of documentsUpload) {
-            const file = await uploadFileToDrive(document.path, 'company_documents');
+            const file = await uploadFile(document, 'company_documents');
             uploadedDocuments.push({
-                fileName: document.originalName,
+                fileName: document.originalname,
                 url: file.webViewLink
             });
 
@@ -300,8 +300,8 @@ const deleteDocuments = async (req, res) => {
         // Eliminar los documentos de Google Drive
         for (const doc of documentsToDelete) {
             const fileId = getFileIdFromUrl(doc.url); // Obtener el ID del archivo de la URL
-            await deleteFileFromDrive(fileId).catch((err) => {
-                console.error(`Failed to delete document ${doc.fileName} from Google Drive:`, err);
+            await deleteFile(fileId).catch((err) => {
+                console.error(`Failed to delete document ${doc.fileName} from storage:`, err);
             });
         }
 
@@ -313,7 +313,7 @@ const deleteDocuments = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            message: 'Documents updated successfully. Unnecessary documents deleted from Google Drive.',
+            message: 'Documents updated successfully. Unnecessary documents deleted from storage.',
             updatedDocuments: documentsToKeep,
         });
     } catch (error) {
@@ -414,7 +414,7 @@ const updateDocuments = async (req, res) => {
         // Eliminar documentos de Google Drive
         for (const doc of documentsToDelete) {
             const fileId = getFileIdFromUrl(doc.url);
-            await deleteFileFromDrive(fileId).catch((err) => {
+            await deleteFile(fileId).catch((err) => {
                 console.error(`Failed to delete document ${doc.fileName}:`, err);
             });
         }
@@ -422,7 +422,7 @@ const updateDocuments = async (req, res) => {
         // Subir nuevos documentos a Google Drive
         const uploadedDocuments = [];
         for (const document of req.files?.documents || []) {
-            const file = await uploadFileToDrive(document, 'company_documents');
+            const file = await uploadFile(document, 'company_documents');
             uploadedDocuments.push({
                 fileName: document.originalname,
                 url: file.webViewLink,
