@@ -5,7 +5,7 @@
  */
 
 const { admin, db } = require('../config/firebaseConfig');
-const { uploadFileToDrive, deleteFileFromDrive, getFileIdFromUrl } = require('../config/googleDrive');
+const { uploadFile, deleteFile, getFileIdFromUrl } = require('../config/storage');
 const fs = require('fs');
 
 /**
@@ -56,12 +56,12 @@ const updateFiles = async (req, res) => {
         // Eliminar los archivos existentes de Google Drive
         if (existingData.banner) {
             const bannerFileId = getFileIdFromUrl(existingData.banner); // Extraer el ID del archivo de la URL
-            await deleteFileFromDrive(bannerFileId);
+            await deleteFile(bannerFileId);
         }
 
         if (existingData.poster) {
             const posterFileId = getFileIdFromUrl(existingData.poster);
-            await deleteFileFromDrive(posterFileId);
+            await deleteFile(posterFileId);
         }
 
         // Subir los nuevos archivos a Google Drive
@@ -69,7 +69,7 @@ const updateFiles = async (req, res) => {
         let newPosterUrl = null;
 
         if (bannerUpload) {
-            const file = await uploadFileToDrive(bannerUpload, 'banners');
+            const file = await uploadFile(bannerUpload, 'banners');
             newBannerUrl = file.webViewLink;
 
             // Eliminar el archivo temporal después de subirlo
@@ -79,7 +79,7 @@ const updateFiles = async (req, res) => {
         }
 
         if (posterUpload) {
-            const file = await uploadFileToDrive(posterUpload, 'posters');
+            const file = await uploadFile(posterUpload, 'posters');
             newPosterUrl = file.webViewLink;
 
             // Eliminar el archivo temporal después de subirlo

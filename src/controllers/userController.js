@@ -5,10 +5,11 @@
  * Define la lógica para manejar las solicitudes relacionadas con los usuarios.
  */
 
+const { proxyBaseUrl } = require('../config/env');
 const { admin, db } = require('../config/firebaseConfig');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { uploadFileToDrive } = require('../config/googleDrive');
+const { uploadFile } = require('../config/storage');
 const fs = require('fs');
 
 
@@ -39,6 +40,17 @@ const register = async (req, res) => {
     const permitionRol = ['admin', 'co', 'visitor'];
     if (!permitionRol.includes(rol)) {
         return res.status(400).json({ error: 'invalid_rol', message: 'Invalid rol' });
+    }
+
+    // Solo un administrador con sesión iniciada puede crear otros administradores
+    if (rol === 'admin') {
+        const authHeader = req.headers.authorization;
+        const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : req.cookies?.authToken;
+        let requester = null;
+        try { requester = token ? jwt.verify(token, process.env.SECRET_KEY) : null; } catch { requester = null; }
+        if (!requester || requester.rol !== 'admin') {
+            return res.status(403).json({ error: 'forbidden', message: 'Only admins can create admin users.' });
+        }
     }
 
     try {
@@ -102,7 +114,7 @@ const register = async (req, res) => {
         let logoId = null;
 
         if (logoUpload) {
-            const fileResponse = await uploadFileToDrive(logoUpload, 'logos');
+            const fileResponse = await uploadFile(logoUpload, 'logos');
             logoUrl = fileResponse.webViewLink;
 
             // Crear un documento en la colección 'logos'
@@ -121,7 +133,7 @@ const register = async (req, res) => {
         }
 
         if (profileImagenUpload) {
-            const fileResponse = await uploadFileToDrive(profileImagenUpload, 'profileImages');
+            const fileResponse = await uploadFile(profileImagenUpload, 'profileImages');
             profileImagenUrl = fileResponse.webViewLink;
 
             // Limpia el archivo temporal después de subirlo
@@ -131,7 +143,7 @@ const register = async (req, res) => {
         }
 
         if (cvUpload) {
-            const cvResponse = await uploadFileToDrive(cvUpload, 'cvFiles');
+            const cvResponse = await uploadFile(cvUpload, 'cvFiles');
             cvUrl = cvResponse.webViewLink;
 
             // Limpia el archivo temporal después de subirlo
@@ -198,7 +210,7 @@ const getAllCompany = async (req, res) => {
                     if (!logoSnapshot.empty) {
                         const logoDoc = logoSnapshot.docs[0]; // Tomar el primer documento encontrado
                         const logoData = logoDoc.data();
-                        logoUrl = 'https://backend-node-wpf9.onrender.com/proxy?url=' + logoData.url; // Extraer la URL del logo
+                        logoUrl = `${proxyBaseUrl}?url=` + logoData.url; // Extraer la URL del logo
                     }
                 }
 
@@ -316,7 +328,7 @@ const getAllUsers = async (req, res) => {
                     if (!logoSnapshot.empty) {
                         const logoDoc = logoSnapshot.docs[0]; // Tomar el primer documento encontrado
                         const logoData = logoDoc.data();
-                        logoUrl = 'https://backend-node-wpf9.onrender.com/proxy?url=' + logoData.url; // Extraer la URL del logo
+                        logoUrl = `${proxyBaseUrl}?url=` + logoData.url; // Extraer la URL del logo
                     }
                 }
 
@@ -367,7 +379,7 @@ const getUserById = async (req, res) => {
             if (!logoSnapshot.empty) {
                 const logoDoc = logoSnapshot.docs[0]; // Tomar el primer documento encontrado
                 const logoData = logoDoc.data();
-                logoUrl = 'https://backend-node-wpf9.onrender.com/proxy?url=' + logoData.url; // Extraer la URL del logo
+                logoUrl = `${proxyBaseUrl}?url=` + logoData.url; // Extraer la URL del logo
             }
         }
 
@@ -534,7 +546,7 @@ const getCompanyAll = async (req, res) => {
                     return {
                         id: doc.id,
                         ...filtaredLogoData,
-                        url: `https://backend-node-wpf9.onrender.com/proxy?url=${filtaredLogoData.url}`,
+                        url: `${proxyBaseUrl}?url=${filtaredLogoData.url}`,
                     };
                 });
 
@@ -584,7 +596,7 @@ const getCompanyAll = async (req, res) => {
                                 id: standSnapshot.id,
                                 ...filteredData,
                                 name: filteredData.url.name,
-                                url: `https://backend-node-wpf9.onrender.com/proxy?url=${filteredData.url.fileUrl}`,
+                                url: `${proxyBaseUrl}?url=${filteredData.url.fileUrl}`,
                             };
                         })()
                         : null;
@@ -595,7 +607,7 @@ const getCompanyAll = async (req, res) => {
                             return {
                                 id: modelSnapshot.id,
                                 ...filteredData,
-                                url: `https://backend-node-wpf9.onrender.com/proxy?url=${filteredData.url.fileUrl}`,
+                                url: `${proxyBaseUrl}?url=${filteredData.url.fileUrl}`,
                             };
                         })()
                         : null;
@@ -684,7 +696,7 @@ const updateLogo = async (req, res) => {
         await admin.drive.files.delete({ fileId: previousLogoFileId });
 
         // Subir el nuevo logo a Google Drive
-        const newLogoResponse = await uploadFileToDrive(logoUpload, 'logos');
+        const newLogoResponse = await uploadFile(logoUpload, 'logos');
         const newLogoUrl = newLogoResponse.webViewLink;
 
         // Actualizar la URL del logo en Firestore

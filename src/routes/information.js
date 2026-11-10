@@ -4,7 +4,7 @@ const informationController = require('../controllers/informationController');
 const { verifyToken } = require('../middlewares/authMiddleware');
 const multer = require('multer');
 
-const upload = multer({ dest: 'udloads/' });
+const upload = multer({ dest: 'uploads/' });
 
 // Ruta para agregar información de la compañía
 router.post(

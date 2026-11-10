@@ -6,9 +6,10 @@
  */
 
 
+const { proxyBaseUrl } = require('../config/env');
 const { db, admin } = require('../config/firebaseConfig');
 const jwt = require('jsonwebtoken');
-const { uploadFileToDrive, getFileIdFromUrl, deleteFileFromDrive } = require('../config/googleDrive');
+const { uploadFile, getFileIdFromUrl, deleteFile } = require('../config/storage');
 const fs = require('fs');
 
 /**
@@ -52,8 +53,8 @@ const createDesign = async (req, res) => {
 
         // Subir archivo de banner a Google Drive
         if (bannerUpload) {
-            const file = await uploadFileToDrive(bannerUpload, 'banners');
-            bannerUrl = 'https://backend-node-wpf9.onrender.com/proxy?url=' + file.webViewLink;
+            const file = await uploadFile(bannerUpload, 'banners');
+            bannerUrl = `${proxyBaseUrl}?url=` + file.webViewLink;
             fs.unlink(bannerUpload.path, (err) => {
                 if (err) console.error('Error deleting temporary file:', err);
             });
@@ -61,8 +62,8 @@ const createDesign = async (req, res) => {
 
         // Subir archivo de póster a Google Drive
         if (posterUpload) {
-            const file = await uploadFileToDrive(posterUpload, 'posters');
-            posterUrl = 'https://backend-node-wpf9.onrender.com/proxy?url=' + file.webViewLink;
+            const file = await uploadFile(posterUpload, 'posters');
+            posterUrl = `${proxyBaseUrl}?url=` + file.webViewLink;
             fs.unlink(posterUpload.path, (err) => {
                 if (err) console.error('Error deleting temporary file:', err);
             });
@@ -96,7 +97,7 @@ const createDesign = async (req, res) => {
         const logo = logoDoc
             ? {
                 id: logoDoc.id,
-                url: `https://backend-node-wpf9.onrender.com/proxy?url=${logoDoc.data().url}`,
+                url: `${proxyBaseUrl}?url=${logoDoc.data().url}`,
             }
             : null;
 
@@ -189,7 +190,7 @@ const getDesign = async (req, res) => {
                     id: standSnapshot.id,
                     ...filteredData,
                     name: filteredData.url.name,
-                    url: `https://backend-node-wpf9.onrender.com/proxy?url=${filteredData.url.fileUrl}`,
+                    url: `${proxyBaseUrl}?url=${filteredData.url.fileUrl}`,
                 };
             })()
             : null;
@@ -206,7 +207,7 @@ const getDesign = async (req, res) => {
                     id: modelSnapshot.id,
                     ...filteredData,
 
-                    url: `https://backend-node-wpf9.onrender.com/proxy?url=${filteredData.url.fileUrl}`,
+                    url: `${proxyBaseUrl}?url=${filteredData.url.fileUrl}`,
                 };
             })()
             : null;
@@ -266,7 +267,7 @@ const getAllDesigns = async (req, res) => {
                             id: standSnapshot.id,
                             ...filteredData,
                             name: filteredData.url.name,
-                            url: `https://backend-node-wpf9.onrender.com/proxy?url=${filteredData.url.fileUrl}`,
+                            url: `${proxyBaseUrl}?url=${filteredData.url.fileUrl}`,
                         };
                     })()
                     : null;
@@ -278,7 +279,7 @@ const getAllDesigns = async (req, res) => {
                         return {
                             id: modelSnapshot.id,
                             ...filteredData,
-                            url: `https://backend-node-wpf9.onrender.com/proxy?url=${filteredData.url.fileUrl}`,
+                            url: `${proxyBaseUrl}?url=${filteredData.url.fileUrl}`,
                         };
                     })()
                     : null;
@@ -399,12 +400,12 @@ const updateDesign = async (req, res) => {
         // Eliminar archivos existentes en Google Drive
         if (existingDataFile.banner) {
             const bannerFileId = getFileIdFromUrl(existingDataFile.banner);
-            await deleteFileFromDrive(bannerFileId);
+            await deleteFile(bannerFileId);
         }
 
         if (existingDataFile.poster) {
             const posterFileId = getFileIdFromUrl(existingDataFile.poster);
-            await deleteFileFromDrive(posterFileId);
+            await deleteFile(posterFileId);
         }
 
 
@@ -413,8 +414,8 @@ const updateDesign = async (req, res) => {
 
         // Subir nuevo archivo de banner a Google Drive
         if (bannerUpload) {
-            const file = await uploadFileToDrive(bannerUpload, 'banners');
-            newBannerUrl = 'https://backend-node-wpf9.onrender.com/proxy?url=' + file.webViewLink;
+            const file = await uploadFile(bannerUpload, 'banners');
+            newBannerUrl = `${proxyBaseUrl}?url=` + file.webViewLink;
             fs.unlink(bannerUpload.path, (err) => {
                 if (err) console.error('Error deleting temporary file:', err);
             });
@@ -422,8 +423,8 @@ const updateDesign = async (req, res) => {
 
         // Subir nuevo archivo de póster a Google Drive
         if (posterUpload) {
-            const file = await uploadFileToDrive(posterUpload, 'posters');
-            newPosterUrl = 'https://backend-node-wpf9.onrender.com/proxy?url=' + file.webViewLink;
+            const file = await uploadFile(posterUpload, 'posters');
+            newPosterUrl = `${proxyBaseUrl}?url=` + file.webViewLink;
             fs.unlink(posterUpload.path, (err) => {
                 if (err) console.error('Error deleting temporary file:', err);
             });

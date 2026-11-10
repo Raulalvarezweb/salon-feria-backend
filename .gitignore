@@ -1,0 +1,9 @@
+node_modules/
+.env
+uploads/
+udloads/
+*.zip
+# Credenciales: nunca subirlas al repositorio
+*firebase-adminsdk*.json
+serviceAccount*.json
+credentials*.json

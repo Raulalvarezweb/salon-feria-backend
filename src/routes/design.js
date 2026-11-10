@@ -12,7 +12,7 @@ const designController = require('../controllers/designController');
 const { verifyToken } = require('../middlewares/authMiddleware');
 const multer = require('multer');
 
-const upload = multer({ dest: 'udloads/' });
+const upload = multer({ dest: 'uploads/' });
 
 /**
  * @route POST /addDesign/:id?

@@ -1,6 +1,7 @@
 /**
  * @module OffersController
  */
+const { proxyBaseUrl } = require('../config/env');
 const { db, admin } = require('../config/firebaseConfig');
 
 /**
@@ -44,7 +45,7 @@ const addOffers = async (req, res) => {
         const logo = logoDoc
             ? {
                 id: logoDoc.id,
-                url: `https://backend-node-wpf9.onrender.com/proxy?url=${logoDoc.data().url}`,
+                url: `${proxyBaseUrl}?url=${logoDoc.data().url}`,
             }
             : null;
 
