@@ -76,3 +76,11 @@ app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
 
+// Datos iniciales (stands, recepcionistas y admin) al arrancar si RUN_SEED=true
+if (process.env.RUN_SEED === 'true') {
+  require('../scripts/seed')
+    .runSeed()
+    .then(() => console.log('[seed] Datos iniciales listos'))
+    .catch((err) => console.error('[seed] Error:', err.message));
+}
+

@@ -4,6 +4,7 @@
  *  - Un usuario administrador
  *
  * Uso:  npm run seed
+ *       o, en Render, con la variable RUN_SEED=true se ejecuta al arrancar el servidor.
  * Necesita en el .env: FIREBASE_SERVICE_ACCOUNT(_PATH), FRONTEND_URL,
  *                      SEED_ADMIN_NAME, SEED_ADMIN_EMAIL, SEED_ADMIN_PASSWORD
  * Es seguro ejecutarlo varias veces: no duplica datos.
@@ -59,12 +60,22 @@ async function seedAdmin() {
   }
 }
 
-(async () => {
-  if (!frontendUrls.length) throw new Error('Define FRONTEND_URL en el .env (la URL de Vercel)');
-  await seedStands();
+async function runSeed() {
+  if (frontendUrls.length) {
+    await seedStands();
+  } else {
+    console.log('… sin FRONTEND_URL: no se crean stands ni recepcionistas');
+  }
   await seedAdmin();
-  process.exit(0);
-})().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+}
+
+module.exports = { runSeed };
+
+if (require.main === module) {
+  runSeed()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
+}

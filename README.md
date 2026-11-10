@@ -19,6 +19,7 @@ npm start              # http://localhost:3000
 ### Despliegue en Render
 - *New → Web Service* con este repo · Build: `npm install` · Start: `npm start`
 - Añade como variables de entorno las de `.env.example` (en `FIREBASE_SERVICE_ACCOUNT` va el contenido del JSON de la cuenta de servicio).
+- Para crear los datos iniciales sin consola: `RUN_SEED=true` + `SEED_ADMIN_*` (es seguro dejarlo activado, no duplica datos).
 - Comprobación: `GET /health` → `{ "ok": true }`
 
 ---
